@@ -1,31 +1,98 @@
-// Задание 3 - форма обратной связи
-// В HTML есть разметка формы. Напиши скрипт который будет сохранять значения полей в локальное хранилище когда пользователь что-то печатает.
+// Задание 3 - генератор промисов
+// Выполняй это задание в файлах 03-promises.html и 03-promises.js. Посмотри демо видео работы генератора промисов.
 
-// <form class="feedback-form" autocomplete="off">
+// В HTML есть разметка формы, в поля которой пользователь будет вводить первую задержку в миллисекундах, шаг увеличения задержки для каждого промиса после первого и количество промисов которое необходимо создать.
+
+// <form class="form">
 //   <label>
-//     Email
-//     <input type="email" name="email" autofocus />
+//     First delay (ms)
+//     <input type="number" name="delay" required />
 //   </label>
 //   <label>
-//     Message
-//     <textarea name="message" rows="8"></textarea>
+//     Delay step (ms)
+//     <input type="number" name="step" required />
 //   </label>
-//   <button type="submit">Submit</button>
+//   <label>
+//     Amount
+//     <input type="number" name="amount" required />
+//   </label>
+//   <button type="submit">Create promises</button>
 // </form>
-// Выполняй это задание в файлах 03-feedback.html и 03-feedback.js. Разбей его на несколько подзадач:
 
-// 1. Отслеживай на форме событие input, и каждый раз записывай в локальное хранилище объект с полями email и message, в которых сохраняй текущие значения полей формы. Пусть ключом для хранилища будет строка "feedback-form-state".
-// 2. При загрузке страницы проверяй состояние хранилища, и если там есть сохраненные данные, заполняй ими поля формы. В противном случае поля должны быть пустыми.
-// 3. При сабмите формы очищай хранилище и поля формы, а также выводи объект с полями email, message и текущими их значениями в консоль.
-// 4. Сделай так, чтобы хранилище обновлялось не чаще чем раз в 500 миллисекунд. Для этого добавь в проект и используй библиотеку lodash.throttle.
+// Напиши скрипт, который при сабмите формы вызывает функцию createPromise(position, delay) столько раз, сколько ввели в поле amount. При каждом вызове передай ей номер создаваемого промиса (position) и задержку учитывая введенную пользователем первую задержку (delay) и шаг (step).
+
+// function createPromise(position, delay) {
+//   const shouldResolve = Math.random() > 0.3;
+//   if (shouldResolve) {
+//     // Fulfill
+//   } else {
+//     // Reject
+//   }
+// }
+
+// Дополни код функции createPromise так, чтобы она возвращала один промис, который выполянется или отклоняется через delay времени. Значением промиса должен быть объект, в котором будут свойства position и delay со значениями одноименных параметров. Используй начальный код функции для выбора того, что нужно сделать с промисом - выполнить или отклонить.
+
+// createPromise(2, 1500)
+//   .then(({ position, delay }) => {
+//     console.log(`✅ Fulfilled promise ${position} in ${delay}ms`);
+//   })
+//   .catch(({ position, delay }) => {
+//     console.log(`❌ Rejected promise ${position} in ${delay}ms`);
+//   });
+
+// Библиотека уведомлений
+// ВНИМАНИЕ
+// Этот функционал не обязателен при сдаче задания, но будет хорошей дополнительной практикой.
+
+// Для отображения уведомлений пользователю вместо console.log() используй библиотеку notiflix.
 
 
+
+import Notiflix from 'notiflix';
+
+const delayEL = document.querySelector('[name=delay]');
+const stepEl = document.querySelector('[name=step]');
+const amountEl = document.querySelector('[name=amount]');
+const btnSubmit = document.querySelector('button');
+// const positions = [];
+
+btnSubmit.addEventListener('click', onStartCreatePromise);
+
+function onStartCreatePromise(e) {
+  e.preventDefault();
+
+  let delay = Number(delayEL.value);
+  const step = Number(stepEl.value);
+  const amount = Number(amountEl.value);
+
+  for (position = 1; position <= amount; position++) {
+    createPromise(position, delay).then(onCreatePromiseSuccess).catch(onCreatePromiseError);
+    delay += step;
+    // positions.push(i);
+  }
+
+  // const promises = positions.map((position, delay) => createPromise(position, delay));
+  // Promise.all(promises).then(onCreatePromiseSuccess).catch(onCreatePromiseError);
+};
 
 function createPromise(position, delay) {
-  const shouldResolve = Math.random() > 0.3;
-  if (shouldResolve) {
-    // Fulfill
-  } else {
-    // Reject
-  }
-}
+  return new Promise((resolve, reject) => {
+    const shouldResolve = Math.random() > 0.3;
+    console.log(shouldResolve);
+  
+    setTimeout(() => {
+      if (shouldResolve) {
+        resolve(`✅ Fulfilled promise ${position} in ${delay}ms`);
+      }
+      reject(`❌ Rejected promise ${position} in ${delay}ms`);
+    }, delay);
+  })
+};
+
+function onCreatePromiseSuccess(result) {
+  Notiflix.Notify.success(result);
+};
+
+function onCreatePromiseError(error) {
+  Notiflix.Notify.failure(error);
+};

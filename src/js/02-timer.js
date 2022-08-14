@@ -1,23 +1,188 @@
-// Задание 2 - видео плеер
-// В HTML есть <iframe> с видео для Vimeo плеера. Напиши скрипт который будет сохранять текущее время воспроизведения видео в локальное хранилище и, при перезагрузке страницы, продолжать воспроизводить видео с этого времени.
+// Задание 2 - таймер обратного отсчета
+// Выполняй это задание в файлах 02-timer.html и 02-timer.js. Напиши скрипт таймера, который ведёт обратный отсчет до определенной даты. Такой таймер может использоваться в блогах и интернет-магазинах, страницах регистрации событий, во время технического обслуживания и т. д. Посмотри демо видео работы таймера.
 
-// <iframe
-//   id="vimeo-player"
-//   src="https://player.vimeo.com/video/236203659"
-//   width="640"
-//   height="360"
-//   frameborder="0"
-//   allowfullscreen
-//   allow="autoplay; encrypted-media"
-// ></iframe>
-// Выполняй это задание в файлах 02-video.html и 02-video.js. Разбей его на несколько подзадач:
+// Элементы интефрейса
+// В HTML есть готовая разметка таймера, поля выбора конечной даты и кнопки, при клике по которой таймер должен запускаться. Добавь минимальное оформление элементов интерфейса.
 
-// 1. Ознакомься с документацией библиотеки Vimeo плеера.
-// 2. Добавь библиотеку как зависимость проекта через npm.
-// 3. Инициализируй плеер в файле скрипта как это описано в секции pre-existing player, но учти что у тебя плеер добавлен как npm пакет, а не через CDN.
-// 4. Разбери документацию метода on() и начни отслеживать событие timeupdate - обновление времени воспроизведения.
-// 5. Сохраняй время воспроизведения в локальное хранилище. Пусть ключом для хранилища будет строка "videoplayer-current-time".
-// 6. При перезагрузке страницы воспользуйся методом setCurrentTime() для того чтобы возобновить воспроизведение с сохраненной позиции.
-// 7. Добавь в проект бибилотеку lodash.throttle и сделай так, чтобы время воспроизведения обновлялось в хранилище не чаще чем раз в секунду.
+// <input type="text" id="datetime-picker" />
+// <button type="button" data-start>Start</button>
 
+// <div class="timer">
+//   <div class="field">
+//     <span class="value" data-days>00</span>
+//     <span class="label">Days</span>
+//   </div>
+//   <div class="field">
+//     <span class="value" data-hours>00</span>
+//     <span class="label">Hours</span>
+//   </div>
+//   <div class="field">
+//     <span class="value" data-minutes>00</span>
+//     <span class="label">Minutes</span>
+//   </div>
+//   <div class="field">
+//     <span class="value" data-seconds>00</span>
+//     <span class="label">Seconds</span>
+//   </div>
+// </div>
+
+// Библиотека flatpickr
+// Используй библиотеку flatpickr для того чтобы позволить пользователю кроссбраузерно выбрать конечную дату и время в одном элементе интерфейса. Для того чтобы подключить CSS код библиотеки в проект, необходимо добавить еще один импорт, кроме того который описан в документации.
+
+// // Описан в документации
+// import flatpickr from "flatpickr";
+// // Дополнительный импорт стилей
+// import "flatpickr/dist/flatpickr.min.css";
+
+// Библиотека ожидает что её инициализируют на элементе input[type="text"], поэтому мы добавили в HTML документ поле input#datetime-picker.
+
+// <input type="text" id="datetime-picker" />
+// Вторым аргументом функции flatpickr(selector, options) можно передать необязательный объект параметров. Мы подготовили для тебя объект который нужен для выполнения задания. Разберись за что отвечает каждое свойство в документации «Options» и используй его в своем коде.
+
+// const options = {
+//   enableTime: true,
+//   time_24hr: true,
+//   defaultDate: new Date(),
+//   minuteIncrement: 1,
+//   onClose(selectedDates) {
+//     console.log(selectedDates[0]);
+//   },
+// };
+
+// Выбор даты
+// Метод onClose() из обьекта параметров вызывается каждый раз при закрытии элемента интерфейса который создает flatpickr. Именно в нём стоит обрабатывать дату выбранную пользователем. Параметр selectedDates это массив выбранных дат, поэтому мы берем первый элемент.
+
+// Если пользователь выбрал дату в прошлом, покажи window.alert() с текстом "Please choose a date in the future".
+// Если пользователь выбрал валидную дату (в будущем), кнопка «Start» становится активной.
+// Кнопка «Start» должа быть не активна до тех пор, пока пользователь не выбрал дату в будущем.
+// При нажатии на кнопку «Start» начинается отсчет времени до выбранной даты с момента нажатия.
+
+// Отсчет времени
+// При нажатии на кнопку «Start» скрипт должен вычислять раз в секунду сколько времени осталось до указанной даты и обновлять интерфейс таймера, показывая четыре цифры: дни, часы, минуты и секунды в формате xx:xx:xx:xx.
+
+// Количество дней может состоять из более чем двух цифр.
+// Таймер должен останавливаться когда дошел до конечной даты, то есть 00:00:00:00.
+
+// НЕ БУДЕМ УСЛОЖНЯТЬ
+// Если таймер запущен, для того чтобы выбрать новую дату и перезапустить его - необходимо перезагрузить страницу.
+
+// Для подсчета значений используй готовую функцию convertMs, где ms - разница между конечной и текущей датой в миллисекундах.
+
+// function convertMs(ms) {
+//   // Number of milliseconds per unit of time
+//   const second = 1000;
+//   const minute = second * 60;
+//   const hour = minute * 60;
+//   const day = hour * 24;
+
+//   // Remaining days
+//   const days = Math.floor(ms / day);
+//   // Remaining hours
+//   const hours = Math.floor((ms % day) / hour);
+//   // Remaining minutes
+//   const minutes = Math.floor(((ms % day) % hour) / minute);
+//   // Remaining seconds
+//   const seconds = Math.floor((((ms % day) % hour) % minute) / second);
+
+//   return { days, hours, minutes, seconds };
+// }
+
+// console.log(convertMs(2000)); // {days: 0, hours: 0, minutes: 0, seconds: 2}
+// console.log(convertMs(140000)); // {days: 0, hours: 0, minutes: 2, seconds: 20}
+// console.log(convertMs(24140000)); // {days: 0, hours: 6 minutes: 42, seconds: 20}
+
+// Форматирование времени
+// Функция convertMs() возвращает объект с рассчитанным оставшимся временем до конечной даты. Обрати внимание, что она не форматирует результат. То есть, если осталось 4 минуты или любой другой составляющей времени, то функция вернет 4, а не 04. В интерфейсе таймера необходимо добавлять 0 если в числе меньше двух символов. Напиши функцию addLeadingZero(value), которая использует метод метод padStart() и перед отрисовкой интефрейса форматируй значение.
+
+// Библиотека уведомлений
+// ВНИМАНИЕ
+// Этот функционал не обязателен при сдаче задания, но будет хорошей дополнительной практикой.
+
+// Для отображения уведомлений пользователю вместо window.alert() используй библиотеку notiflix.
+
+
+
+import flatpickr from "flatpickr";
+import "flatpickr/dist/flatpickr.min.css";
+import Notiflix from 'notiflix';
+
+const input = document.querySelector("#datetime-picker");
+const daysEl = document.querySelector("[data-days]");
+const hoursEl = document.querySelector("[data-hours]");
+const minutesEl = document.querySelector("[data-minutes]");
+const secondsEl = document.querySelector("[data-seconds]");
+const btnEl = document.querySelector("[data-start]");
+
+let setDate = 0;
+let intervalId = null;
+
+btnEl.disabled = true;
+btnEl.addEventListener('click', onStartTimer)
+
+const options = {
+  enableTime: true,
+  time_24hr: true,
+  defaultDate: new Date(),
+  minuteIncrement: 1,
+  onClose,
+};
+
+flatpickr(input, options);
+
+function onClose(selectedDates) {
+  const currentDate = Date.now();
+
+  if (selectedDates[0] < currentDate) {
+    Notiflix.Notify.failure('Please choose a date in the future');
+  }
+  else {
+    setDate = selectedDates[0];
+    btnEl.disabled = false;
+  }
+}
+
+function onStartTimer() {
+  btnEl.disabled = true;
+
+  intervalId = setInterval(() => {
+    const currentDate = Date.now();
+    const delta = setDate - currentDate;
+    
+    updateData(delta);
+
+    if (delta < 1000) {
+      clearInterval(intervalId);
+    }
+  }, 1000);  
+}
+
+function addLeadingZero(value) {
+  return String(value).padStart(2, "0"); 
+}
+
+function convertMs(ms) {
+  // Number of milliseconds per unit of time
+  const second = 1000;
+  const minute = second * 60;
+  const hour = minute * 60;
+  const day = hour * 24;
+
+  // Remaining days
+  const days = addLeadingZero(Math.floor(ms / day));
+  // Remaining hours
+  const hours = addLeadingZero(Math.floor((ms % day) / hour));
+  // Remaining minutes
+  const minutes = addLeadingZero(Math.floor(((ms % day) % hour) / minute));
+  // Remaining seconds
+  const seconds = addLeadingZero(Math.floor((((ms % day) % hour) % minute) / second));
+
+  return { days, hours, minutes, seconds };
+}
+
+function updateData(time) {
+  daysEl.textContent = convertMs(time).days;
+  hoursEl.textContent = convertMs(time).hours;
+  minutesEl.textContent = convertMs(time).minutes;
+  secondsEl.textContent = convertMs(time).seconds;
+}
 

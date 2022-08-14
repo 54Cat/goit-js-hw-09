@@ -1,14 +1,51 @@
-// Задание 1 - библиотека SimpleLightbox
-// Выполняй это задание в файлах 01-gallery.html и 01-gallery.js. Разбей его на несколько подзадач:
+// Задание 1 - переключатель цветов
 
-// 1. Добавь библиотеку SimpleLightbox как зависимость проекта используя npm (ссылка на CDN из твоей прошлой работы больше не нужна).
-// 2. Используй свой JavaScript код из предыдущей домашней работы, но выполни рефакторинг с учетом того, что библиотека была установлена через npm (синтаксис import/export).
+// Выполняй это задание в файлах 01-color-switcher.html и 01-color-switcher.js. Посмотри демо видео работы переключателя.
 
-// Для того чтобы подключить CSS код библиотеки в проект, необходимо добавить еще один импорт, кроме того который описан в документации.
+// В HTML есть кнопки «Start» и «Stop».
 
-// // Описан в документации
-// import SimpleLightbox from "simplelightbox";
-// // Дополнительный импорт стилей
-// import "simplelightbox/dist/simple-lightbox.min.css";
+// <button type="button" data-start>Start</button>
+// <button type="button" data-stop>Stop</button>
+
+// Напиши скрипт, который после нажатия кнопки «Start», раз в секунду меняет цвет фона <body> на случайное значение используя инлайн стиль. При нажатии на кнопку «Stop», изменение цвета фона должно останавливаться.
+
+// ВНИМАНИЕ
+// Учти, на кнопку «Start» можно нажать бесконечное количество раз. Сделай так, чтобы пока изменение темы запушено, кнопка «Start» была не активна (disabled).
+
+// Для генерации случайного цвета используй функцию getRandomHexColor.
+
+// function getRandomHexColor() {
+//   return `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+// }
 
 
+
+const btnStart = document.querySelector("[data-start]");
+const btnStop = document.querySelector("[data-stop]");
+let intervalId = null;
+
+btnStop.disabled = true;
+
+btnStart.addEventListener('click', onStartSwitchColor);
+btnStop.addEventListener('click', onStopSwitchColor);
+
+function onStartSwitchColor() {
+    btnStop.disabled = false;
+    btnStart.disabled = true;
+
+    intervalId = setInterval(() => {
+        let color = getRandomHexColor();
+        document.body.style.backgroundColor = color;
+    }, 1000); 
+}
+
+function onStopSwitchColor() {
+    btnStop.disabled = true;
+    btnStart.disabled = false;
+
+    clearInterval(intervalId);
+}
+
+function getRandomHexColor() {
+  return `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+}
