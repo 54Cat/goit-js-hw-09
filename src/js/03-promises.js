@@ -15,7 +15,7 @@ function onStartCreatePromise(e) {
   const amount = Number(amountEl.value);
   let delay = firstDelay;
 
-  for (position = 1; position <= amount; position++) {
+  for (let position = 1; position <= amount; position++) {
     createPromise(position, delay).then(lookResultFulfilled).catch(lookResultRejected);
     delay += stepDelay;
   }
